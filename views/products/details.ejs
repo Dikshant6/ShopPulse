@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %> - ShopPulse</title>
+    <link rel="stylesheet" href="/css/products.css">
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Brand Logo -->
+            <div class="brand-area">
+                <a href="<%= (typeof user !== 'undefined' && user) ? '/dashboard' : '/products' %>" class="brand-logo" aria-label="ShopPulse Home">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <span>ShopPulse</span>
+                </a>
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <span class="admin-tag">Admin</span>
+                <% } %>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav>
+                <ul class="nav-links">
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a href="/products" class="active">Storefront</a></li>
+                        <li class="nav-item"><a href="/admin/products">Products</a></li>
+                    <% } else if (typeof user !== 'undefined' && user) { %>
+                        <li class="nav-item"><a href="/dashboard">Home</a></li>
+                        <li class="nav-item"><a href="/products" class="active">Products</a></li>
+                        <li class="nav-item"><a href="/orders">Orders</a></li>
+                        <li class="nav-item"><a href="/cart">Cart</a></li>
+                    <% } else { %>
+                        <li class="nav-item"><a href="/products" class="active">Products</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+
+            <!-- User Profile / Auth Area -->
+            <div class="header-user-area">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="user-badge" title="<%= user.email %>">
+                        <div class="user-avatar">
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                        </div>
+                        <span class="user-name-text"><%= user.name %></span>
+                    </div>
+                    <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
+                <% } else { %>
+                    <a href="/auth/login" class="btn btn-outline btn-sm">Login</a>
+                    <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up</a>
+                <% } %>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Details Container -->
+    <main class="products-container">
+
+        <!-- Back to Products Link -->
+        <nav class="back-nav" aria-label="Breadcrumb">
+            <a href="/products" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Products
+            </a>
+        </nav>
+
+        <!-- Product Details Layout -->
+        <article class="product-detail-layout">
+            
+            <!-- Left Column: Product Images Gallery -->
+            <section class="product-gallery" aria-label="Product Images">
+                <div class="gallery-main-image-wrap">
+                    <% if (product.images && product.images.length > 0 && product.images[0]) { %>
+                        <img 
+                            id="main-product-image"
+                            src="<%= product.images[0] %>" 
+                            alt="<%= product.name %>" 
+                            class="gallery-main-image"
+                            onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'product-card-placeholder\'><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'M21 15l-5-5L5 21\'/></svg><span>No image available</span></div>';"
+                        >
+                    <% } else { %>
+                        <div class="product-card-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                            <span>No image available</span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Display all images if multiple images exist -->
+                <% if (product.images && product.images.length > 1) { %>
+                    <div class="gallery-thumbnails" role="tablist" aria-label="Product Image Thumbnails">
+                        <% product.images.forEach(function(imgUrl, index) { %>
+                            <button 
+                                type="button" 
+                                class="gallery-thumb <%= index === 0 ? 'active' : '' %>"
+                                onclick="document.getElementById('main-product-image').src='<%= imgUrl %>'; document.querySelectorAll('.gallery-thumb').forEach(function(el){el.classList.remove('active')}); this.classList.add('active');"
+                                aria-label="View Image <%= index + 1 %>"
+                            >
+                                <img src="<%= imgUrl %>" alt="<%= product.name %> preview <%= index + 1 %>">
+                            </button>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </section>
+
+            <!-- Right Column: Product Information -->
+            <section class="product-info-col" aria-label="Product Information">
+                <div class="product-info-header">
+                    <!-- Brand & Category -->
+                    <div class="product-meta-tags">
+                        <% if (product.brand) { %>
+                            <span class="badge-tag badge-brand"><%= product.brand %></span>
+                        <% } %>
+                        <% if (product.category) { %>
+                            <span class="badge-tag"><%= product.category %></span>
+                        <% } %>
+                    </div>
+
+                    <!-- Product Name -->
+                    <h1 class="product-detail-title"><%= product.name %></h1>
+                </div>
+
+                <!-- Price -->
+                <div class="product-detail-pricing">
+                    <span class="detail-price">₹<%= Number(product.price).toFixed(2) %></span>
+                </div>
+
+                <!-- Stock & Availability -->
+                <div class="product-stock-section">
+                    <% if (product.stock > 0) { %>
+                        <span class="stock-badge in-stock">
+                            In Stock
+                        </span>
+                        <p class="stock-note"><%= product.stock %> <%= product.stock === 1 ? 'unit' : 'units' %> available in stock.</p>
+                    <% } else { %>
+                        <span class="stock-badge out-of-stock">
+                            Out of Stock
+                        </span>
+                        <p class="stock-note">This item is currently unavailable.</p>
+                    <% } %>
+                </div>
+
+                <!-- Description -->
+                <div class="product-description-section">
+                    <h3>Description</h3>
+                    <p class="product-description-text"><%= product.description || 'No description provided for this product.' %></p>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="product-detail-actions">
+                    <a href="/products" class="btn btn-outline">
+                        ← Back to Catalog
+                    </a>
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <a href="/admin/products/<%= product._id %>/edit" class="btn btn-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit Product in Admin
+                        </a>
+                    <% } %>
+                </div>
+            </section>
+
+        </article>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

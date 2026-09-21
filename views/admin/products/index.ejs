@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management - ShopPulse Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+    <!-- Admin Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-area">
+                <a href="/dashboard" class="brand-logo" aria-label="ShopPulse Home">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <span>ShopPulse</span>
+                </a>
+                <span class="admin-tag">Admin</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a href="/products">Storefront</a></li>
+                    <li class="nav-item"><a href="/admin/products" class="active">Products</a></li>
+                </ul>
+            </nav>
+
+            <!-- User Area -->
+            <div class="header-user-area">
+                <% const currentUser = (typeof user !== 'undefined' && user) ? user : { name: 'Admin', email: 'admin@shoppulse.com', role: 'admin' }; %>
+                <div class="user-badge" title="<%= currentUser.email %>">
+                    <div class="user-avatar">
+                        <%= currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'A' %>
+                    </div>
+                    <span class="user-name-text"><%= currentUser.name %></span>
+                </div>
+                <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Admin Container -->
+    <main class="admin-container">
+        
+        <!-- Breadcrumb Navigation -->
+        <nav class="admin-breadcrumb" aria-label="Breadcrumbs">
+            <a href="/dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Dashboard
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="current">Product Management</span>
+        </nav>
+
+        <!-- Page Header -->
+        <section class="admin-page-header">
+            <div class="header-text-group">
+                <h1>Product Management</h1>
+                <p>Manage your store catalog, monitor inventory levels, and organize products.</p>
+            </div>
+            <div class="header-actions">
+                <a href="/admin/products/new" class="btn btn-primary" id="addNewProductBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Product
+                </a>
+            </div>
+        </section>
+
+        <!-- Product Listing Content -->
+        <% const productList = (typeof products !== 'undefined' && products) ? products : []; %>
+        
+        <% if (productList.length > 0) { %>
+            
+            <!-- Toolbar with live search and counter -->
+            <section class="admin-toolbar" aria-label="Catalog Tools">
+                <div class="toolbar-search-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="adminTableSearch" 
+                        class="toolbar-search-input" 
+                        placeholder="Search products by name, brand, or category..."
+                        aria-label="Search products"
+                    >
+                </div>
+                <div class="toolbar-meta">
+                    <span>Total items:</span>
+                    <span class="meta-count-badge" id="productCountBadge"><%= productList.length %> <%= productList.length === 1 ? 'product' : 'products' %></span>
+                </div>
+            </section>
+
+            <!-- Responsive Product Table Card -->
+            <div class="admin-table-card">
+                <div class="table-responsive">
+                    <table class="admin-table" aria-label="Store Products Table">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="min-width: 260px;">Product</th>
+                                <th scope="col">Brand</th>
+                                <th scope="col">Category</th>
+                                <th scope="col" class="text-right">Price</th>
+                                <th scope="col" class="text-center">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-right" style="min-width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% productList.forEach(function(product) { %>
+                                <tr data-product-id="<%= product._id %>">
+                                    <!-- Product Info & Thumbnail -->
+                                    <td>
+                                        <div class="table-product-cell">
+                                            <div class="table-product-thumb">
+                                                <% if (product.images && product.images.length > 0 && product.images[0]) { %>
+                                                    <img 
+                                                        src="<%= product.images[0] %>" 
+                                                        alt="<%= product.name %>" 
+                                                        loading="lazy"
+                                                        onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'table-product-thumb-placeholder\'><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'M21 15l-5-5L5 21\'/></svg></div>';"
+                                                    >
+                                                <% } else { %>
+                                                    <div class="table-product-thumb-placeholder">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                                            <path d="M21 15l-5-5L5 21"/>
+                                                        </svg>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                            <div class="table-product-info">
+                                                <span class="table-product-name" title="<%= product.name %>">
+                                                    <a href="/products/<%= product._id %>" target="_blank" title="View product on storefront">
+                                                        <%= product.name %>
+                                                    </a>
+                                                </span>
+                                                <span class="table-product-sub">ID: <%= String(product._id).substring(String(product._id).length - 6) %></span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Brand -->
+                                    <td>
+                                        <% if (product.brand) { %>
+                                            <span class="badge-tag badge-brand"><%= product.brand %></span>
+                                        <% } else { %>
+                                            <span class="text-subtle">—</span>
+                                        <% } %>
+                                    </td>
+
+                                    <!-- Category -->
+                                    <td>
+                                        <% if (product.category) { %>
+                                            <span class="badge-tag"><%= product.category %></span>
+                                        <% } else { %>
+                                            <span class="text-subtle">—</span>
+                                        <% } %>
+                                    </td>
+
+                                    <!-- Price -->
+                                    <td class="text-right">
+                                        <span class="table-price-value">₹<%= Number(product.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                    </td>
+
+                                    <!-- Stock -->
+                                    <td class="text-center">
+                                        <span class="table-stock-value"><%= product.stock != null ? product.stock : 0 %></span>
+                                    </td>
+
+                                    <!-- Status Badge -->
+                                    <td>
+                                        <% 
+                                            const stockCount = Number(product.stock) || 0;
+                                            if (stockCount > 10) { 
+                                        %>
+                                            <span class="stock-badge in-stock">In Stock</span>
+                                        <% } else if (stockCount > 0 && stockCount <= 10) { %>
+                                            <span class="stock-badge low-stock">Low Stock</span>
+                                        <% } else { %>
+                                            <span class="stock-badge out-of-stock">Out of Stock</span>
+                                        <% } %>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="text-right">
+                                        <div class="table-actions-group">
+                                            <a 
+                                                href="/admin/products/<%= product._id %>/edit" 
+                                                class="btn-table-action btn-edit" 
+                                                title="Edit <%= product.name %>"
+                                                aria-label="Edit <%= product.name %>"
+                                            >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                </svg>
+                                                <span>Edit</span>
+                                            </a>
+                                            <button 
+                                                type="button" 
+                                                class="btn-table-action btn-delete" 
+                                                data-id="<%= product._id %>" 
+                                                data-name="<%= product.name %>"
+                                                title="Delete <%= product.name %>"
+                                                aria-label="Delete <%= product.name %>"
+                                            >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hidden Empty State Container (for dynamic JS transition if all rows deleted) -->
+            <div id="emptyStateContainer" style="display: none;">
+                <div class="empty-state-card">
+                    <div class="empty-state-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <h2>No products yet</h2>
+                    <p>Start building your catalog by adding your first product.</p>
+                    <a href="/admin/products/new" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        + Add Product
+                    </a>
+                </div>
+            </div>
+
+        <% } else { %>
+            
+            <!-- Empty State -->
+            <div class="empty-state-card">
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </div>
+                <h2>No products yet</h2>
+                <p>Start building your catalog by adding your first product.</p>
+                <a href="/admin/products/new" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    + Add Product
+                </a>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <!-- Delete Confirmation Modal Dialog -->
+    <div class="modal-backdrop" id="deleteConfirmModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-dialog">
+            <div class="modal-body-content">
+                <div class="modal-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="modal-text-content">
+                    <h3 id="modalTitle">Delete Product?</h3>
+                    <p>This action cannot be undone. Are you sure you want to delete <span class="modal-product-highlight" id="deleteProductName">this product</span>?</p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                <button type="button" class="btn btn-danger-solid" id="confirmDeleteBtn">Delete Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+        <p>&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </footer>
+
+    <!-- Admin JavaScript Interactions -->
+    <script src="/js/admin-products.js"></script>
+
+</body>
+</html>

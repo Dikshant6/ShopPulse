@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - ShopPulse</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+    <!-- 1. Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Brand Logo -->
+            <div class="brand-area">
+                <a href="/dashboard" class="brand-logo" aria-label="ShopPulse Home">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <span>ShopPulse</span>
+                </a>
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <span class="admin-tag">Admin</span>
+                <% } %>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav>
+                <ul class="nav-links">
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <li class="nav-item"><a href="/dashboard" class="active">Dashboard</a></li>
+                        <li class="nav-item"><a href="/products">Storefront</a></li>
+                        <li class="nav-item"><a href="/admin/products">Products</a></li>
+                    <% } else { %>
+                        <li class="nav-item"><a href="/dashboard" class="active">Home</a></li>
+                        <li class="nav-item"><a href="/products">Products</a></li>
+                        <li class="nav-item"><a href="/orders">Orders</a></li>
+                        <li class="nav-item"><a href="/cart">Cart</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+
+            <!-- User Profile & Logout Area -->
+            <div class="header-user-area">
+                <div class="user-badge" title="<%= user.email %>">
+                    <div class="user-avatar">
+                        <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                    </div>
+                    <span class="user-name-text"><%= user.name %></span>
+                </div>
+                <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard-container">
+        
+        <!-- 2. Welcome Section -->
+        <section class="welcome-section">
+            <h1>Welcome, <%= user.name %></h1>
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <p class="welcome-subtitle">Manage store catalog, product inventory, and customer storefront.</p>
+            <% } else { %>
+                <p class="welcome-subtitle">Manage your account, orders and shopping activity.</p>
+            <% } %>
+        </section>
+
+        <!-- 5. Dashboard Summary Cards -->
+        <section class="summary-grid" aria-label="Account Overview">
+            
+            <div class="summary-card">
+                <div class="summary-icon-wrap orders">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <div class="summary-content">
+                    <span class="summary-title">Total Orders</span>
+                    <span class="summary-value">0</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon-wrap pending">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="summary-content">
+                    <span class="summary-title">Pending Orders</span>
+                    <span class="summary-value">0</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon-wrap cart">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
+                <div class="summary-content">
+                    <span class="summary-title">Cart Items</span>
+                    <span class="summary-value">0</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon-wrap wishlist">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                <div class="summary-content">
+                    <span class="summary-title">Wishlist Items</span>
+                    <span class="summary-value">0</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Main Content & Sidebar Layout -->
+        <div class="dashboard-layout">
+            
+            <!-- Main Column: Quick Actions & Recent Orders -->
+            <div class="dashboard-main-col">
+                
+                <!-- 4. Quick Actions -->
+                <section aria-labelledby="quick-actions-title">
+                    <div class="section-header">
+                        <h2 id="quick-actions-title" class="section-title">Quick Actions</h2>
+                    </div>
+
+                    <div class="actions-grid">
+                        <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                            <!-- Manage Products -->
+                            <a href="/admin/products" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>Manage Products</h3>
+                                    <p>View inventory table, edit existing items, and organize catalog.</p>
+                                </div>
+                            </a>
+
+                            <!-- Add New Product -->
+                            <a href="/admin/products/new" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>Add New Product</h3>
+                                    <p>Create and publish new products with images and pricing.</p>
+                                </div>
+                            </a>
+
+                            <!-- Browse Storefront -->
+                            <a href="/products" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>Browse Storefront</h3>
+                                    <p>Explore the live catalog and product details as customers see them.</p>
+                                </div>
+                            </a>
+
+                            <!-- Account / Profile -->
+                            <a href="#profile" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>Account / Profile</h3>
+                                    <p>View administrator profile details, role permissions, and credentials.</p>
+                                </div>
+                            </a>
+                        <% } else { %>
+                            <!-- Browse Products -->
+                            <a href="/products" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>Browse Products</h3>
+                                    <p>Explore our catalog, newest arrivals, and exclusive offers.</p>
+                                </div>
+                            </a>
+
+                            <!-- View Orders -->
+                            <a href="/orders" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 11 12 14 22 4"></polyline>
+                                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>View Orders</h3>
+                                    <p>Track shipments, review receipts, and check order history.</p>
+                                </div>
+                            </a>
+
+                            <!-- View Cart -->
+                            <a href="/cart" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="9" cy="21" r="1"></circle>
+                                        <circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>View Cart</h3>
+                                    <p>Check selected items, update quantities, and checkout.</p>
+                                </div>
+                            </a>
+
+                            <!-- Account / Profile -->
+                            <a href="#profile" class="action-card">
+                                <div class="action-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <div class="action-info">
+                                    <h3>Account / Profile</h3>
+                                    <p>View your profile details, role permissions, and credentials.</p>
+                                </div>
+                            </a>
+                        <% } %>
+                    </div>
+                </section>
+
+                <!-- 6. Recent Activity -->
+                <section aria-labelledby="recent-orders-title">
+                    <div class="section-header">
+                        <h2 id="recent-orders-title" class="section-title">
+                            <%= (typeof user !== 'undefined' && user && user.role === 'admin') ? 'Catalog Overview' : 'Recent Orders' %>
+                        </h2>
+                    </div>
+
+                    <!-- Clean Empty State -->
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                        </div>
+                        <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                            <h3>Product Catalog Ready</h3>
+                            <p>Manage existing items or add new products to the catalog.</p>
+                            <a href="/admin/products" class="btn btn-primary">Manage Products</a>
+                        <% } else { %>
+                            <h3>No orders yet.</h3>
+                            <p>Your recent orders will appear here.</p>
+                            <a href="/products" class="btn btn-primary">Start Shopping</a>
+                        <% } %>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Sidebar Column: User Information -->
+            <aside class="dashboard-side-col" id="profile">
+                
+                <!-- 3. User Information Section -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <div class="profile-avatar-lg">
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                        </div>
+                        <div class="profile-heading">
+                            <h3><%= user.name %></h3>
+                            <p>Account Overview</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-details-list">
+                        <div class="detail-item">
+                            <span class="detail-label">Full Name</span>
+                            <span class="detail-value"><%= user.name %></span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">Email Address</span>
+                            <span class="detail-value"><%= user.email %></span>
+                        </div>
+
+                        <div class="detail-item">
+                            <span class="detail-label">Account Role</span>
+                            <div>
+                                <span class="role-badge"><%= user.role %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Assistance Note -->
+                <div class="info-note-card">
+                    <h4>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        Need Help?
+                    </h4>
+                    <p>Have questions about your account, orders, or deliveries? Reach out to customer support anytime.</p>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

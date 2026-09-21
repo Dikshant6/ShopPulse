@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof step !== 'undefined' && step === 'otp' ? 'Verify Email' : (typeof step !== 'undefined' && step === 'details' ? 'Complete Registration' : 'Register') %> - ShopPulse</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <!-- Brand Logo -->
+        <a href="/products" class="brand-logo" aria-label="ShopPulse Home">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+            <span>ShopPulse</span>
+        </a>
+
+        <!-- Authentication Card -->
+        <div class="auth-card">
+            <% const currentStep = typeof step !== 'undefined' ? step : 'email'; %>
+
+            <% if (currentStep === 'otp') { %>
+                <!-- STEP 2: OTP Verification -->
+                <div class="auth-card-header">
+                    <h2>Verify your email</h2>
+                    <p class="auth-card-subtitle">
+                        We sent a 6-digit verification code to <strong><%= typeof email !== 'undefined' && email ? email : 'your email' %></strong>
+                    </p>
+                </div>
+
+                <% if (typeof message !== 'undefined' && message) { %>
+                    <div class="auth-alert" role="alert">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span><%= message %></span>
+                    </div>
+                <% } %>
+
+                <form method="POST" action="/auth/register/verify-otp">
+                    <input type="hidden" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>">
+
+                    <div class="form-group">
+                        <label for="userOtp">6-Digit Verification Code</label>
+                        <input
+                            type="text"
+                            id="userOtp"
+                            name="userOtp"
+                            class="otp-input"
+                            placeholder="123456"
+                            maxlength="6"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            required
+                            autocomplete="one-time-code"
+                            autofocus
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-submit">Verify OTP</button>
+                </form>
+
+                <div class="auth-card-options">
+                    <form method="POST" action="/auth/register/request-otp" style="display:inline;">
+                        <input type="hidden" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>">
+                        <span class="text-muted">Didn't receive code?</span>
+                        <button type="submit" class="btn-link">Resend OTP</button>
+                    </form>
+                    <span class="dot-separator">•</span>
+                    <a href="/auth/register" class="link-subtle">Change email</a>
+                </div>
+
+            <% } else if (currentStep === 'details') { %>
+                <!-- STEP 3: Complete Registration -->
+                <div class="auth-card-header">
+                    <h2>Complete Registration</h2>
+                    <p class="auth-card-subtitle">Set your username and password to finish signing up</p>
+                </div>
+
+                <% if (typeof message !== 'undefined' && message) { %>
+                    <div class="auth-alert" role="alert">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span><%= message %></span>
+                    </div>
+                <% } %>
+
+                <% if (typeof email !== 'undefined' && email) { %>
+                    <div class="verified-email-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span><%= email %></span>
+                    </div>
+                <% } %>
+
+                <form method="POST" action="/auth/register">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="John Doe" required autocomplete="name" autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+
+                    <button type="submit" class="btn-submit">Create Account</button>
+                </form>
+
+            <% } else { %>
+                <!-- STEP 1: Email Request -->
+                <div class="auth-card-header">
+                    <h2>Create an Account</h2>
+                    <p class="auth-card-subtitle">Sign up to get started with ShopPulse</p>
+                </div>
+
+                <% if (typeof message !== 'undefined' && message) { %>
+                    <div class="auth-alert" role="alert">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span><%= message %></span>
+                    </div>
+                <% } %>
+
+                <form method="POST" action="/auth/register/request-otp">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="<%= typeof email !== 'undefined' ? email : '' %>"
+                            placeholder="name@example.com"
+                            required
+                            autocomplete="email"
+                            autofocus
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-submit">Send Verification Code</button>
+                </form>
+            <% } %>
+
+            <div class="auth-footer">
+                Already have an account? <a href="/auth/login">Sign in</a>
+            </div>
+        </div>
+
+        <p class="page-footer">&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </div>
+
+</body>
+</html>

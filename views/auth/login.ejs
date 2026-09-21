@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ShopPulse</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <!-- Brand Logo -->
+        <a href="/products" class="brand-logo" aria-label="ShopPulse Home">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+            <span>ShopPulse</span>
+        </a>
+
+        <!-- Authentication Card -->
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <h2>Welcome Back</h2>
+                <p class="auth-card-subtitle">Sign in to your ShopPulse account</p>
+            </div>
+
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="auth-alert" role="alert">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span><%= message %></span>
+                </div>
+            <% } %>
+
+            <form method="POST" action="/auth/login">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="name@example.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-submit">Sign In</button>
+            </form>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="/auth/register">Create an account</a>
+            </div>
+        </div>
+
+        <p class="page-footer">&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </div>
+
+</body>
+</html>

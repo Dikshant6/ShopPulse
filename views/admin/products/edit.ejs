@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product - ShopPulse Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+    <!-- Admin Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-area">
+                <a href="/dashboard" class="brand-logo" aria-label="ShopPulse Home">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <span>ShopPulse</span>
+                </a>
+                <span class="admin-tag">Admin</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a href="/products">Storefront</a></li>
+                    <li class="nav-item"><a href="/admin/products" class="active">Products</a></li>
+                </ul>
+            </nav>
+
+            <!-- User Area -->
+            <div class="header-user-area">
+                <% const currentUser = (typeof user !== 'undefined' && user) ? user : { name: 'Admin', email: 'admin@shoppulse.com', role: 'admin' }; %>
+                <div class="user-badge" title="<%= currentUser.email %>">
+                    <div class="user-avatar">
+                        <%= currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'A' %>
+                    </div>
+                    <span class="user-name-text"><%= currentUser.name %></span>
+                </div>
+                <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Admin Container -->
+    <main class="admin-container">
+        
+        <% const prod = (typeof product !== 'undefined' && product) ? product : {}; %>
+
+        <!-- Breadcrumb Navigation -->
+        <nav class="admin-breadcrumb" aria-label="Breadcrumbs">
+            <a href="/dashboard">Dashboard</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/admin/products">Product Management</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="current">Edit Product</span>
+        </nav>
+
+        <!-- Form Card Surface -->
+        <div class="admin-card">
+            
+            <div class="admin-card-header">
+                <h2>Edit Product</h2>
+                <p>Update product specifications, inventory, and imagery for <strong><%= prod.name || 'this item' %></strong>.</p>
+            </div>
+
+            <!-- Inline Alert Box -->
+            <div class="admin-alert error" id="formAlertBox" style="display: none;" role="alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="formAlertMessage">Please resolve the form errors.</span>
+            </div>
+
+            <form id="adminProductForm" data-mode="edit" data-product-id="<%= prod._id || '' %>" novalidate>
+                
+                <div class="form-grid">
+                    
+                    <!-- Product Name -->
+                    <div class="form-group form-col-full">
+                        <label for="name">
+                            Product Name <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            class="form-control" 
+                            placeholder="e.g. Wireless Noise-Cancelling Headphones" 
+                            value="<%= prod.name || '' %>"
+                            required 
+                            autocomplete="off"
+                        >
+                        <span class="input-help-text">Product title as shown to customers.</span>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group">
+                        <label for="category">
+                            Category <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="category" 
+                            name="category" 
+                            class="form-control" 
+                            placeholder="e.g. Electronics, Footwear, Apparel" 
+                            value="<%= prod.category || '' %>"
+                            required 
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <!-- Brand -->
+                    <div class="form-group">
+                        <label for="brand">
+                            Brand <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="brand" 
+                            name="brand" 
+                            class="form-control" 
+                            placeholder="e.g. Sony, Nike, Apple" 
+                            value="<%= prod.brand || '' %>"
+                            required 
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <!-- Price -->
+                    <div class="form-group">
+                        <label for="price">
+                            Price (INR) <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">₹</span>
+                            <input 
+                                type="number" 
+                                id="price" 
+                                name="price" 
+                                class="form-control" 
+                                placeholder="0.00" 
+                                step="0.01" 
+                                min="0" 
+                                value="<%= prod.price != null ? prod.price : '' %>"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Stock Quantity -->
+                    <div class="form-group">
+                        <label for="stock">
+                            Stock Quantity <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="stock" 
+                            name="stock" 
+                            class="form-control" 
+                            placeholder="0" 
+                            min="0" 
+                            value="<%= prod.stock != null ? prod.stock : 0 %>" 
+                            required
+                        >
+                        <span class="input-help-text">Available units in inventory.</span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group form-col-full">
+                        <label for="description">Product Description</label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-control" 
+                            rows="4" 
+                            placeholder="Detailed description of features, materials, specifications, and warranty..."
+                        ><%= prod.description || '' %></textarea>
+                    </div>
+
+                    <!-- Product Image URLs -->
+                    <div class="form-group form-col-full">
+                        <label>
+                            Product Images (URLs) <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <span class="input-help-text" style="margin-bottom: 6px;">
+                            Enter direct image URLs (e.g. HTTPS links). Multiple URLs are supported.
+                        </span>
+
+                        <div class="image-urls-section">
+                            <div class="image-url-list" id="imageUrlsContainer">
+                                <% const imgList = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? prod.images : ['']; %>
+                                <% imgList.forEach(function(imgUrl, idx) { %>
+                                    <div class="image-url-row">
+                                        <span class="image-url-row-index"><%= idx + 1 %>.</span>
+                                        <input 
+                                            type="url" 
+                                            class="form-control image-url-input" 
+                                            name="images[]" 
+                                            placeholder="https://example.com/product-image-<%= idx + 1 %>.jpg" 
+                                            value="<%= imgUrl %>"
+                                            required 
+                                            autocomplete="off"
+                                        >
+                                        <button 
+                                            type="button" 
+                                            class="btn-remove-url" 
+                                            title="Remove URL" 
+                                            aria-label="Remove image URL"
+                                            <%= imgList.length === 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : '' %>
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                <% }); %>
+                            </div>
+
+                            <button type="button" class="btn btn-secondary btn-sm btn-add-url" id="addImageUrlBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Add Another Image URL
+                            </button>
+
+                            <!-- Live Image Previews -->
+                            <div class="image-previews-container" id="imagePreviewsSection" style="display: none;">
+                                <div class="image-previews-title">Live Image Previews</div>
+                                <div class="image-previews-grid" id="imagePreviewsGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Form Actions Bar -->
+                <div class="form-actions-bar">
+                    <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary" id="submitProductBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+        <p>&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </footer>
+
+    <!-- Admin JavaScript Interactions -->
+    <script src="/js/admin-products.js"></script>
+
+</body>
+</html>
