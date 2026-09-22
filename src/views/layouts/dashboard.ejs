@@ -38,6 +38,7 @@
                     <% } else { %>
                         <li class="nav-item"><a href="/dashboard" class="active">Home</a></li>
                         <li class="nav-item"><a href="/products">Products</a></li>
+                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
                         <li class="nav-item"><a href="/orders">Orders</a></li>
                         <li class="nav-item"><a href="/cart">Cart</a></li>
                     <% } %>
@@ -109,7 +110,7 @@
                 </div>
                 <div class="summary-content">
                     <span class="summary-title">Cart Items</span>
-                    <span class="summary-value">0</span>
+                    <span class="summary-value"><%= stats.cartItems %></span>
                 </div>
             </div>
 
@@ -121,7 +122,7 @@
                 </div>
                 <div class="summary-content">
                     <span class="summary-title">Wishlist Items</span>
-                    <span class="summary-value">0</span>
+                    <span class="summary-value"><%= stats.wishlistItems %></span>
                 </div>
             </div>
 

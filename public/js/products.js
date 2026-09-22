@@ -15,23 +15,103 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * 1. Wishlist Button Visual Toggle
+ * 1. Wishlist Button API Integration & Toggle
  */
-function initWishlistToggle() {
-  document.querySelectorAll('.btn-wishlist').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+async function initWishlistToggle() {
+  const wishlistButtons = document.querySelectorAll('.btn-wishlist');
+  if (wishlistButtons.length === 0) return;
+
+  // Sync existing wishlist items on page load if user is authenticated
+  try {
+    const res = await fetch('/wishlist', {
+      headers: { 'Accept': 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.wishlist && Array.isArray(data.wishlist.products)) {
+        const savedIds = new Set(data.wishlist.products.map(p => (p._id || p).toString()));
+        wishlistButtons.forEach((btn) => {
+          const pId = btn.dataset.productId;
+          if (pId && savedIds.has(pId)) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+            btn.setAttribute('title', 'Remove from wishlist');
+          }
+        });
+      }
+    }
+  } catch (e) {
+    // Gracefully ignore if unauthenticated or network error
+  }
+
+  wishlistButtons.forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      const isActive = btn.classList.toggle('is-active');
-      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-      
-      const productName = btn.closest('.product-card')?.querySelector('.product-card-title a')?.textContent?.trim() || 'Product';
-      btn.setAttribute(
-        'aria-label',
-        isActive ? `Remove ${productName} from wishlist` : `Add ${productName} to wishlist`
-      );
-      btn.setAttribute('title', isActive ? 'Remove from wishlist' : 'Save to wishlist');
+      if (btn.disabled || btn.classList.contains('is-loading')) return;
+
+      const productId = btn.dataset.productId;
+      if (!productId) return;
+
+      const card = btn.closest('.product-card');
+      const productName = card?.querySelector('.product-card-title a')?.textContent?.trim() || 'Product';
+      const isCurrentlyActive = btn.classList.contains('is-active');
+
+      btn.classList.add('is-loading');
+
+      try {
+        if (isCurrentlyActive) {
+          // Remove from wishlist
+          const response = await fetch(`/wishlist/${productId}`, {
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json' },
+          });
+          const data = await response.json().catch(() => ({}));
+
+          if (response.ok) {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-pressed', 'false');
+            btn.setAttribute('aria-label', `Add ${productName} to wishlist`);
+            btn.setAttribute('title', 'Save to wishlist');
+            showStorefrontToast(`Removed "${productName}" from your wishlist`, 'info');
+          } else if (response.status === 401) {
+            showStorefrontToast('Please login first to manage your wishlist.', 'error');
+          } else {
+            showStorefrontToast(data.message || 'Could not update wishlist', 'error');
+          }
+        } else {
+          // Add to wishlist
+          const response = await fetch(`/wishlist/${productId}`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+          });
+          const data = await response.json().catch(() => ({}));
+
+          if (response.ok) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+            btn.setAttribute('aria-label', `Remove ${productName} from wishlist`);
+            btn.setAttribute('title', 'Remove from wishlist');
+            showStorefrontToast(`Added "${productName}" to your wishlist`, 'success');
+          } else if (response.status === 401) {
+            showStorefrontToast('Please login first to save items to your wishlist.', 'error');
+          } else if (data.message && data.message.includes('already in wishlist')) {
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+            btn.setAttribute('aria-label', `Remove ${productName} from wishlist`);
+            btn.setAttribute('title', 'Remove from wishlist');
+            showStorefrontToast(`"${productName}" is already in your wishlist`, 'info');
+          } else {
+            showStorefrontToast(data.message || 'Could not add to wishlist', 'error');
+          }
+        }
+      } catch (err) {
+        console.error('Error updating wishlist:', err);
+        showStorefrontToast('Network error while updating wishlist. Please try again.', 'error');
+      } finally {
+        btn.classList.remove('is-loading');
+      }
     });
   });
 }
@@ -73,35 +153,124 @@ function initQuantitySelectors() {
 }
 
 /**
- * 3. Add to Cart Visual Feedback
+ * Helper to show toast notification
+ */
+function showStorefrontToast(message, type = 'info', duration = 3500) {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.setAttribute('role', 'alert');
+
+  let iconSvg = '';
+  if (type === 'success') {
+    iconSvg = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+  } else if (type === 'error') {
+    iconSvg = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+  } else {
+    iconSvg = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+  }
+
+  const safeMsg = document.createElement('span');
+  safeMsg.className = 'toast-message';
+  safeMsg.textContent = message;
+
+  toast.innerHTML = iconSvg;
+  toast.appendChild(safeMsg);
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add('toast-show');
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('toast-show');
+    toast.classList.add('toast-hide');
+    setTimeout(() => {
+      if (toast.parentElement) toast.parentElement.removeChild(toast);
+    }, 300);
+  }, duration);
+}
+
+/**
+ * 3. Add to Cart API Integration & Feedback
  */
 function initAddToCartFeedback() {
   document.querySelectorAll('.btn-add-to-cart').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.preventDefault();
       
-      // If disabled (out of stock), do nothing
-      if (btn.disabled || btn.classList.contains('is-added')) return;
+      // If disabled (out of stock) or already processing, ignore
+      if (btn.disabled || btn.classList.contains('is-loading')) return;
 
-      const card = btn.closest('.product-card');
-      const qtyInput = card ? card.querySelector('.qty-input') : null;
-      const quantity = qtyInput ? qtyInput.value : '1';
+      const card = btn.closest('.product-card') || btn.closest('.product-detail-layout') || document;
+      const productId = btn.dataset.productId;
+      const productName = btn.dataset.productName || card.querySelector('.product-card-title a, .product-detail-title')?.textContent?.trim() || 'Product';
+      const qtyInput = card.querySelector('.qty-input');
+      const quantity = parseInt(qtyInput ? qtyInput.value : '1', 10) || 1;
       const textSpan = btn.querySelector('.cart-btn-text');
       const originalText = textSpan ? textSpan.textContent : 'Add to Cart';
 
-      // Visual success feedback
-      btn.classList.add('is-added');
-      if (textSpan) {
-        textSpan.textContent = quantity > 1 ? `Added (${quantity})` : 'Added to Cart!';
-      }
+      if (!productId) return;
 
-      // Revert feedback after delay
-      setTimeout(() => {
-        btn.classList.remove('is-added');
-        if (textSpan) {
-          textSpan.textContent = originalText;
+      // Set loading state
+      btn.classList.add('is-loading');
+      btn.disabled = true;
+      if (textSpan) textSpan.textContent = 'Adding...';
+
+      try {
+        const response = await fetch('/cart/items', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            productId,
+            quantity,
+          }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+          // Success state
+          btn.classList.add('is-added');
+          if (textSpan) {
+            textSpan.textContent = quantity > 1 ? `Added (${quantity})` : 'Added to Cart!';
+          }
+          showStorefrontToast(`Added ${quantity > 1 ? quantity + ' × ' : ''}"${productName}" to your cart`, 'success');
+
+          setTimeout(() => {
+            btn.classList.remove('is-added');
+            if (textSpan) {
+              textSpan.textContent = originalText;
+            }
+          }, 1800);
+        } else if (response.status === 401) {
+          showStorefrontToast('Please login first to add items to your cart.', 'error');
+          if (textSpan) textSpan.textContent = originalText;
+        } else {
+          const errorMsg = data.message || 'Could not add product to cart';
+          showStorefrontToast(errorMsg, 'error');
+          if (textSpan) textSpan.textContent = originalText;
         }
-      }, 1500);
+      } catch (err) {
+        console.error('Error adding to cart:', err);
+        showStorefrontToast('Network error while adding to cart. Please try again.', 'error');
+        if (textSpan) textSpan.textContent = originalText;
+      } finally {
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+      }
     });
   });
 }

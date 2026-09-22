@@ -13,7 +13,7 @@ export const sendOtpEmail = async (email, otp) => {
   });
 
   const html = await ejs.renderFile(
-    path.resolve("views/templates/otpEmail.ejs"),
+    path.resolve("src/views/templates/otpEmail.ejs"),
     { otp, expiryMinutes: 5, year: new Date().getFullYear() },
   );
 
