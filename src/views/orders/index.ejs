@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - ShopPulse</title>
+    <meta name="description" content="View and manage your past purchases and track order delivery statuses on ShopPulse.">
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Brand Logo -->
+            <div class="brand-area">
+                <a href="<%= (typeof user !== 'undefined' && user) ? '/dashboard' : '/products' %>" class="brand-logo" aria-label="ShopPulse Home">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <span>ShopPulse</span>
+                </a>
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <span class="admin-tag">Admin</span>
+                <% } %>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav aria-label="Main Navigation">
+                <ul class="nav-links">
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a href="/products">Storefront</a></li>
+                        <li class="nav-item"><a href="/admin/products">Products</a></li>
+                    <% } else if (typeof user !== 'undefined' && user) { %>
+                        <li class="nav-item"><a href="/dashboard">Home</a></li>
+                        <li class="nav-item"><a href="/products">Products</a></li>
+                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
+                        <li class="nav-item"><a href="/orders" class="active" aria-current="page">Orders</a></li>
+                        <li class="nav-item"><a href="/cart">Cart</a></li>
+                    <% } else { %>
+                        <li class="nav-item"><a href="/products">Products</a></li>
+                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
+                        <li class="nav-item"><a href="/cart">Cart</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+
+            <!-- User Profile / Auth Area -->
+            <div class="header-user-area">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="user-badge" title="<%= user.email %>">
+                        <div class="user-avatar">
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                        </div>
+                        <span class="user-name-text"><%= user.name %></span>
+                    </div>
+                    <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
+                <% } else { %>
+                    <a href="/auth/login" class="btn btn-outline btn-sm">Login</a>
+                    <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up</a>
+                <% } %>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Orders Container -->
+    <main class="orders-container">
+        
+        <!-- Page Header -->
+        <section class="orders-page-header">
+            <div class="orders-title-wrap">
+                <div class="orders-heading-row">
+                    <h1>My Orders</h1>
+                    <span class="orders-count-badge" id="ordersCountBadge" style="display: none;">
+                        0 orders
+                    </span>
+                </div>
+                <p class="orders-subtitle">Track and manage your recent purchases and delivery statuses.</p>
+            </div>
+            <div class="orders-header-actions">
+                <a href="/products" class="orders-continue-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Continue Shopping
+                </a>
+            </div>
+        </section>
+
+        <!-- 1. Skeleton Loading State -->
+        <div id="ordersLoadingSkeleton" class="skeleton-container" aria-label="Loading orders">
+            <div class="skeleton-card">
+                <div class="skeleton-line w-40 h-28"></div>
+                <div class="skeleton-line w-80"></div>
+                <div class="skeleton-line w-20"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-line w-40 h-28"></div>
+                <div class="skeleton-line w-80"></div>
+                <div class="skeleton-line w-20"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-line w-40 h-28"></div>
+                <div class="skeleton-line w-80"></div>
+                <div class="skeleton-line w-20"></div>
+            </div>
+        </div>
+
+        <!-- 2. Error State -->
+        <section id="ordersErrorContainer" class="error-state" style="display: none;" aria-live="polite">
+            <div class="error-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h2>Unable to load orders</h2>
+            <p id="ordersErrorMessage">We couldn't retrieve your order history right now. Please try again.</p>
+            <button type="button" class="btn btn-primary" id="retryOrdersBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                Retry
+            </button>
+        </section>
+
+        <!-- 3. Active Orders List (Rendered dynamically via orders.js) -->
+        <section id="ordersList" class="orders-list" style="display: none;" aria-label="Order History List">
+            <!-- Dynamically populated by orders.js -->
+        </section>
+
+        <!-- 4. Empty Orders State -->
+        <section 
+            id="emptyOrdersContainer" 
+            class="empty-state" 
+            style="display: none;"
+            aria-label="No orders notification"
+        >
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+            </div>
+            <h2>No orders yet</h2>
+            <p>Your purchases will appear here once you place your first order.</p>
+            <a href="/products" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                Continue Shopping
+            </a>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Site Footer -->
+    <footer class="app-footer">
+        <p>&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </footer>
+
+    <!-- Client-Side Orders Controller -->
+    <script src="/js/orders.js"></script>
+
+</body>
+</html>

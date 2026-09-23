@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - ShopPulse</title>
+    <meta name="description" content="View details, items snapshot, shipping address, and summary for your ShopPulse order.">
+    <link rel="stylesheet" href="/css/orders.css">
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Brand Logo -->
+            <div class="brand-area">
+                <a href="<%= (typeof user !== 'undefined' && user) ? '/dashboard' : '/products' %>" class="brand-logo" aria-label="ShopPulse Home">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                    </div>
+                    <span>ShopPulse</span>
+                </a>
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <span class="admin-tag">Admin</span>
+                <% } %>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav aria-label="Main Navigation">
+                <ul class="nav-links">
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a href="/products">Storefront</a></li>
+                        <li class="nav-item"><a href="/admin/products">Products</a></li>
+                    <% } else if (typeof user !== 'undefined' && user) { %>
+                        <li class="nav-item"><a href="/dashboard">Home</a></li>
+                        <li class="nav-item"><a href="/products">Products</a></li>
+                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
+                        <li class="nav-item"><a href="/orders" class="active" aria-current="page">Orders</a></li>
+                        <li class="nav-item"><a href="/cart">Cart</a></li>
+                    <% } else { %>
+                        <li class="nav-item"><a href="/products">Products</a></li>
+                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
+                        <li class="nav-item"><a href="/cart">Cart</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+
+            <!-- User Profile / Auth Area -->
+            <div class="header-user-area">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="user-badge" title="<%= user.email %>">
+                        <div class="user-avatar">
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                        </div>
+                        <span class="user-name-text"><%= user.name %></span>
+                    </div>
+                    <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
+                <% } else { %>
+                    <a href="/auth/login" class="btn btn-outline btn-sm">Login</a>
+                    <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up</a>
+                <% } %>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="orders-container" id="orderDetailsApp" data-order-id="<%= typeof orderId !== 'undefined' && orderId ? orderId : '' %>">
+        
+        <!-- Back to Orders Navigation -->
+        <nav class="back-nav" aria-label="Breadcrumb">
+            <a href="/orders" class="back-link">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Orders
+            </a>
+        </nav>
+
+        <!-- 1. Skeleton Loading State -->
+        <div id="detailsLoadingSkeleton" class="skeleton-container" aria-label="Loading order details">
+            <div class="skeleton-card">
+                <div class="skeleton-line w-40 h-36"></div>
+                <div class="skeleton-line w-20"></div>
+            </div>
+            <div class="order-details-layout">
+                <div class="skeleton-card">
+                    <div class="skeleton-line w-100 h-28"></div>
+                    <div class="skeleton-line w-80"></div>
+                    <div class="skeleton-line w-60"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line w-100 h-28"></div>
+                    <div class="skeleton-line w-60"></div>
+                    <div class="skeleton-line w-80"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Error / 404 State -->
+        <section id="detailsErrorContainer" class="error-state" style="display: none;" aria-live="polite">
+            <div class="error-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h2 id="detailsErrorTitle">Order Not Found</h2>
+            <p id="detailsErrorMessage">We couldn't retrieve the requested order. It may not exist or you may not have permission to view it.</p>
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 14px;">
+                <button type="button" class="btn btn-outline" id="retryDetailsBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    Retry
+                </button>
+                <a href="/orders" class="btn btn-primary">Back to My Orders</a>
+            </div>
+        </section>
+
+        <!-- 3. Active Order Details Content (Rendered dynamically via order-details.js) -->
+        <div id="detailsContent" style="display: none;">
+            
+            <!-- Order Header Overview Card -->
+            <section class="order-overview-card" aria-label="Order Overview">
+                <div class="overview-main">
+                    <div class="overview-id-row">
+                        <h1 id="overviewOrderId">Order #...</h1>
+                        <button type="button" class="btn-copy-id" id="copyOrderIdBtn" title="Copy full Order ID to clipboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copy ID
+                        </button>
+                    </div>
+                    <span class="overview-date" id="overviewOrderDate">Placed on ...</span>
+                </div>
+                <div class="overview-badges">
+                    <div class="badge-block">
+                        <span class="badge-block-label">Order Status</span>
+                        <div id="overviewOrderStatusBadge"></div>
+                    </div>
+                    <div class="badge-block">
+                        <span class="badge-block-label">Payment</span>
+                        <div id="overviewPaymentStatusBadge"></div>
+                    </div>
+                    <div class="badge-block order-cancel-block" id="orderCancelActionBlock" style="display: none;">
+                        <span class="badge-block-label">Action</span>
+                        <button type="button" class="btn btn-outline-danger btn-sm" id="cancelOrderBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            Cancel Order
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2-Column Layout -->
+            <div class="order-details-layout">
+                
+                <!-- Left Column: Order Items Snapshot -->
+                <section class="order-items-column" aria-label="Order Items Snapshot">
+                    <div class="order-items-card">
+                        <div class="order-items-header">
+                            <h2>Purchased Items</h2>
+                            <span class="orders-count-badge" id="detailsItemsCountBadge">0 items</span>
+                        </div>
+                        <div class="order-items-table-header">
+                            <span>Item</span>
+                            <span>Unit Price</span>
+                            <span>Qty</span>
+                            <span>Subtotal</span>
+                        </div>
+                        <div class="order-items-list" id="detailsItemsList">
+                            <!-- Items populated by order-details.js -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Column: Order Summary & Shipping Address -->
+                <aside class="order-sidebar-column">
+                    
+                    <!-- Order Summary Card -->
+                    <div class="order-summary-card" aria-label="Order Summary">
+                        <div class="card-title-row">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            </svg>
+                            <h2>Order Summary</h2>
+                        </div>
+                        <div class="summary-rows">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span id="summarySubtotal">₹0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Shipping Fee</span>
+                                <span id="summaryShipping">₹0.00</span>
+                            </div>
+                            <div class="summary-row total-row">
+                                <span>Total Paid</span>
+                                <span class="summary-total-amount" id="summaryTotal">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address Card -->
+                    <div class="shipping-address-card" aria-label="Delivery Address">
+                        <div class="card-title-row">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <h2>Shipping Address</h2>
+                        </div>
+                        <div class="address-details" id="shippingAddressDetails">
+                            <!-- Populated by order-details.js -->
+                        </div>
+                    </div>
+
+                    <!-- Help & Assistance Note -->
+                    <div class="support-card" aria-label="Customer Support">
+                        <div class="card-title-row">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <h2>Need Help?</h2>
+                        </div>
+                        <div class="support-content">
+                            <p>Have questions regarding your order shipment, returns, or invoice? Our customer support team is here to help 24/7.</p>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Cancel Order Confirmation Modal Dialog -->
+    <div class="modal-backdrop" id="cancelOrderModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="cancelModalTitle">
+        <div class="modal-dialog">
+            <div class="modal-body-content">
+                <div class="modal-icon-wrap modal-icon-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="modal-text-content">
+                    <h3 id="cancelModalTitle">Cancel Order?</h3>
+                    <p id="cancelModalMessage">Are you sure you want to cancel this order? The ordered product stock will be restored.</p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="keepOrderBtn">Keep Order</button>
+                <button type="button" class="btn btn-danger-solid" id="confirmCancelBtn">Cancel Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Site Footer -->
+    <footer class="app-footer">
+        <p>&copy; <%= new Date().getFullYear() %> ShopPulse. All rights reserved.</p>
+    </footer>
+
+    <!-- Client-Side Order Details Controller -->
+    <script src="/js/order-details.js"></script>
+
+</body>
+</html>

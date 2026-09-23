@@ -6,7 +6,10 @@ import productRoutes from "./routes/product.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import cookieParser from "cookie-parser";
-import wishlistRoutes from "./routes/wishlist.route.js"
+import wishlistRoutes from "./routes/wishlist.route.js";
+import orderRoutes from "./routes/order.routes.js";
+import checkoutRoutes from "./routes/checkout.routes.js";
+
 export const app = express();
 
 app.use(express.json());
@@ -25,3 +28,7 @@ app.use("/products", productRoutes);
 app.use("/admin", adminRoutes);
 app.use("/cart", cartRoutes);
 app.use("/wishlist", wishlistRoutes);
+app.use("/orders", orderRoutes);
+app.use("/checkout", checkoutRoutes);
+
+

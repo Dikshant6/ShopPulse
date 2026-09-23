@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Shopping Cart - ShopPulse</title>
     <link rel="stylesheet" href="/css/cart.css">
 </head>
+
 <body>
 
     <!-- Header & Navigation (Consistent with ShopPulse Design) -->
@@ -13,9 +15,11 @@
         <div class="header-container">
             <!-- Brand Logo -->
             <div class="brand-area">
-                <a href="<%= (typeof user !== 'undefined' && user) ? '/dashboard' : '/products' %>" class="brand-logo" aria-label="ShopPulse Home">
+                <a href="<%= (typeof user !== 'undefined' && user) ? '/dashboard' : '/products' %>" class="brand-logo"
+                    aria-label="ShopPulse Home">
                     <div class="brand-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round">
                             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                             <line x1="3" y1="6" x2="21" y2="6"></line>
                             <path d="M16 10a4 4 0 0 1-8 0"></path>
@@ -23,46 +27,48 @@
                     </div>
                     <span>ShopPulse</span>
                 </a>
-                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <% if (typeof user !=='undefined' && user && user.role==='admin' ) { %>
                     <span class="admin-tag">Admin</span>
-                <% } %>
+                    <% } %>
             </div>
 
             <!-- Navigation Links -->
             <nav>
                 <ul class="nav-links">
-                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <% if (typeof user !=='undefined' && user && user.role==='admin' ) { %>
                         <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
                         <li class="nav-item"><a href="/products">Storefront</a></li>
                         <li class="nav-item"><a href="/admin/products">Products</a></li>
-                    <% } else if (typeof user !== 'undefined' && user) { %>
-                        <li class="nav-item"><a href="/dashboard">Home</a></li>
-                        <li class="nav-item"><a href="/products">Products</a></li>
-                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
-                        <li class="nav-item"><a href="/orders">Orders</a></li>
-                        <li class="nav-item"><a href="/cart" class="active">Cart</a></li>
-                    <% } else { %>
-                        <li class="nav-item"><a href="/products">Products</a></li>
-                        <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
-                        <li class="nav-item"><a href="/cart" class="active">Cart</a></li>
-                    <% } %>
+                        <% } else if (typeof user !=='undefined' && user) { %>
+                            <li class="nav-item"><a href="/dashboard">Home</a></li>
+                            <li class="nav-item"><a href="/products">Products</a></li>
+                            <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
+                            <li class="nav-item"><a href="/orders">Orders</a></li>
+                            <li class="nav-item"><a href="/cart" class="active">Cart</a></li>
+                            <% } else { %>
+                                <li class="nav-item"><a href="/products">Products</a></li>
+                                <li class="nav-item"><a href="/wishlist">Wishlist</a></li>
+                                <li class="nav-item"><a href="/cart" class="active">Cart</a></li>
+                                <% } %>
                 </ul>
             </nav>
 
             <!-- User Profile / Auth Area -->
             <div class="header-user-area">
-                <% if (typeof user !== 'undefined' && user) { %>
+                <% if (typeof user !=='undefined' && user) { %>
                     <div class="user-badge" title="<%= user.email %>">
                         <div class="user-avatar">
                             <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
                         </div>
-                        <span class="user-name-text"><%= user.name %></span>
+                        <span class="user-name-text">
+                            <%= user.name %>
+                        </span>
                     </div>
                     <a href="/auth/logout" class="btn btn-outline btn-sm">Logout</a>
-                <% } else { %>
-                    <a href="/auth/login" class="btn btn-outline btn-sm">Login</a>
-                    <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up</a>
-                <% } %>
+                    <% } else { %>
+                        <a href="/auth/login" class="btn btn-outline btn-sm">Login</a>
+                        <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up</a>
+                        <% } %>
             </div>
 
         </div>
@@ -71,303 +77,308 @@
     <!-- Main Cart Container -->
     <main class="cart-container">
 
-        <%
-            const cartItems = (typeof cart !== 'undefined' && cart && Array.isArray(cart.items)) 
-                ? cart.items.filter(item => item && item.product) 
-                : [];
-            
+        <% const cartItems=(typeof cart !=='undefined' && cart && Array.isArray(cart.items)) ? cart.items.filter(item=>
+            item && item.product)
+            : [];
+
             let initialSubtotal = 0;
             let totalItemUnits = 0;
 
             cartItems.forEach(item => {
-                const pPrice = Number(item.product.price) || 0;
-                const pQty = Number(item.quantity) || 1;
-                initialSubtotal += pPrice * pQty;
-                totalItemUnits += pQty;
+            const pPrice = Number(item.product.price) || 0;
+            const pQty = Number(item.quantity) || 1;
+            initialSubtotal += pPrice * pQty;
+            totalItemUnits += pQty;
             });
-        %>
+            %>
 
-        <!-- Page Header -->
-        <section class="cart-page-header">
-            <div class="cart-title-wrap">
-                <h1>Your Cart</h1>
-                <span class="cart-count-badge" id="cartCountBadge">
-                    <%= totalItemUnits %> <%= totalItemUnits === 1 ? 'item' : 'items' %>
-                </span>
-            </div>
-            <a href="/products" class="cart-continue-link">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-                Continue Shopping
-            </a>
-        </section>
-
-        <!-- Active Cart Layout (Items + Order Summary) -->
-        <div id="cartActiveLayout" class="cart-layout" style="<%= cartItems.length === 0 ? 'display: none;' : '' %>">
-            
-            <!-- Left Column: Cart Items List -->
-            <section class="cart-items-column" aria-label="Shopping Cart Items">
-                <div class="cart-items-card">
-                    <!-- Table-like Header -->
-                    <div class="cart-items-header">
-                        <span>Product</span>
-                        <span>Price</span>
-                        <span>Quantity</span>
-                        <span>Subtotal</span>
-                        <span></span>
-                    </div>
-
-                    <!-- Items List -->
-                    <div class="cart-items-list" id="cartItemsList">
-                        <% cartItems.forEach(function(item) { %>
-                            <% 
-                                const product = item.product;
-                                const unitPrice = Number(product.price) || 0;
-                                const quantity = Number(item.quantity) || 1;
-                                const itemSubtotal = unitPrice * quantity;
-                                const stockCount = Number(product.stock) || 0;
-                            %>
-                            <article 
-                                class="cart-item" 
-                                data-product-id="<%= product._id %>"
-                                data-price="<%= unitPrice %>"
-                                data-stock="<%= stockCount %>"
-                            >
-                                <!-- 1. Product Info & Thumbnail -->
-                                <div class="cart-product-cell">
-                                    <div class="cart-product-thumb">
-                                        <% if (product.images && product.images.length > 0 && product.images[0]) { %>
-                                            <img 
-                                                src="<%= product.images[0] %>" 
-                                                alt="<%= product.name %>" 
-                                                loading="lazy"
-                                                onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'cart-thumb-placeholder\'><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'M21 15l-5-5L5 21\'/></svg></div>';"
-                                            >
-                                        <% } else { %>
-                                            <div class="cart-thumb-placeholder">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                                    <path d="M21 15l-5-5L5 21"/>
-                                                </svg>
-                                            </div>
-                                        <% } %>
-                                    </div>
-                                    <div class="cart-product-info">
-                                        <div class="cart-product-badges">
-                                            <% if (product.brand) { %>
-                                                <span class="badge-tag badge-brand"><%= product.brand %></span>
-                                            <% } %>
-                                            <% if (product.category) { %>
-                                                <span class="badge-tag"><%= product.category %></span>
-                                            <% } %>
-                                        </div>
-                                        <h2 class="cart-product-name">
-                                            <a href="/products/<%= product._id %>" title="<%= product.name %>">
-                                                <%= product.name %>
-                                            </a>
-                                        </h2>
-                                        <div class="cart-product-meta">
-                                            <% if (stockCount > 0) { %>
-                                                <span class="stock-badge in-stock">In Stock</span>
-                                            <% } else { %>
-                                                <span class="stock-badge out-of-stock">Out of Stock</span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 2. Unit Price -->
-                                <div class="cart-price-cell">
-                                    <span class="cart-unit-price-label">Price: </span>
-                                    <span class="item-unit-price">₹<%= unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                </div>
-
-                                <!-- 3. Quantity Controls -->
-                                <div class="cart-qty-cell">
-                                    <div class="qty-selector" aria-label="Quantity Controls">
-                                        <button 
-                                            type="button" 
-                                            class="qty-btn btn-qty-minus" 
-                                            aria-label="Decrease quantity" 
-                                            data-product-id="<%= product._id %>"
-                                            <%= quantity <= 1 ? 'disabled' : '' %>
-                                            title="Decrease quantity"
-                                        >
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                            </svg>
-                                        </button>
-                                        <input 
-                                            type="number" 
-                                            class="qty-input" 
-                                            value="<%= quantity %>" 
-                                            min="1" 
-                                            max="<%= stockCount > 0 ? stockCount : 99 %>" 
-                                            aria-label="Item quantity" 
-                                            readonly
-                                        >
-                                        <button 
-                                            type="button" 
-                                            class="qty-btn btn-qty-plus" 
-                                            aria-label="Increase quantity" 
-                                            data-product-id="<%= product._id %>"
-                                            title="Increase quantity"
-                                        >
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- 4. Item Subtotal -->
-                                <div class="cart-subtotal-cell">
-                                    <span class="cart-subtotal-label">Subtotal: </span>
-                                    <span class="item-subtotal-price">₹<%= itemSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                </div>
-
-                                <!-- 5. Remove Button -->
-                                <div class="cart-remove-cell">
-                                    <button 
-                                        type="button" 
-                                        class="btn-remove-item" 
-                                        data-product-id="<%= product._id %>"
-                                        data-product-name="<%= product.name %>"
-                                        title="Remove <%= product.name %> from cart"
-                                        aria-label="Remove <%= product.name %> from cart"
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </article>
-                        <% }); %>
-                    </div>
+            <!-- Page Header -->
+            <section class="cart-page-header">
+                <div class="cart-title-wrap">
+                    <h1>Your Cart</h1>
+                    <span class="cart-count-badge" id="cartCountBadge">
+                        <%= totalItemUnits %>
+                            <%= totalItemUnits===1 ? 'item' : 'items' %>
+                    </span>
                 </div>
-
-                <!-- Bottom Toolbar: Continue Shopping & Clear Cart -->
-                <div class="cart-actions-toolbar">
-                    <a href="/products" class="btn btn-outline">
-                        ← Continue Shopping
-                    </a>
-                    <button type="button" class="btn btn-outline-danger" id="clearCartBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                        Clear Cart
-                    </button>
-                </div>
+                <a href="/products" class="cart-continue-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Continue Shopping
+                </a>
             </section>
 
-            <!-- Right Column: Order Summary Card -->
-            <aside class="cart-summary-column" aria-label="Order Summary">
-                <div class="cart-summary-card">
-                    <h2>Order Summary</h2>
-                    
-                    <div class="summary-rows">
-                        <div class="summary-row">
-                            <span>Subtotal (<span id="summaryUnitsCount"><%= totalItemUnits %></span> <%= totalItemUnits === 1 ? 'item' : 'items' %>)</span>
-                            <span id="summarySubtotal">₹<%= initialSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            <!-- Active Cart Layout (Items + Order Summary) -->
+            <div id="cartActiveLayout" class="cart-layout"
+                style="<%= cartItems.length === 0 ? 'display: none;' : '' %>">
+
+                <!-- Left Column: Cart Items List -->
+                <section class="cart-items-column" aria-label="Shopping Cart Items">
+                    <div class="cart-items-card">
+                        <!-- Table-like Header -->
+                        <div class="cart-items-header">
+                            <span>Product</span>
+                            <span>Price</span>
+                            <span>Quantity</span>
+                            <span>Subtotal</span>
+                            <span></span>
                         </div>
-                        <div class="summary-row">
-                            <span>Estimated Shipping</span>
-                            <span class="summary-val-free">FREE</span>
-                        </div>
-                        <div class="summary-row total-row">
-                            <span>Total</span>
-                            <span class="summary-total-amount" id="summaryTotal">₹<%= initialSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+
+                        <!-- Items List -->
+                        <div class="cart-items-list" id="cartItemsList">
+                            <% cartItems.forEach(function(item) { %>
+                                <% const product=item.product; const unitPrice=Number(product.price) || 0; const
+                                    quantity=Number(item.quantity) || 1; const itemSubtotal=unitPrice * quantity; const
+                                    stockCount=Number(product.stock) || 0; %>
+                                    <article class="cart-item" data-product-id="<%= product._id %>"
+                                        data-price="<%= unitPrice %>" data-stock="<%= stockCount %>">
+                                        <!-- 1. Product Info & Thumbnail -->
+                                        <div class="cart-product-cell">
+                                            <div class="cart-product-thumb">
+                                                <% if (product.images && product.images.length> 0 && product.images[0])
+                                                    { %>
+                                                    <img src="<%= product.images[0] %>" alt="<%= product.name %>"
+                                                        loading="lazy"
+                                                        onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'cart-thumb-placeholder\'><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'1.5\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'M21 15l-5-5L5 21\'/></svg></div>';">
+                                                    <% } else { %>
+                                                        <div class="cart-thumb-placeholder">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                stroke-width="1.5">
+                                                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                                                <path d="M21 15l-5-5L5 21" />
+                                                            </svg>
+                                                        </div>
+                                                        <% } %>
+                                            </div>
+                                            <div class="cart-product-info">
+                                                <div class="cart-product-badges">
+                                                    <% if (product.brand) { %>
+                                                        <span class="badge-tag badge-brand">
+                                                            <%= product.brand %>
+                                                        </span>
+                                                        <% } %>
+                                                            <% if (product.category) { %>
+                                                                <span class="badge-tag">
+                                                                    <%= product.category %>
+                                                                </span>
+                                                                <% } %>
+                                                </div>
+                                                <h2 class="cart-product-name">
+                                                    <a href="/products/<%= product._id %>" title="<%= product.name %>">
+                                                        <%= product.name %>
+                                                    </a>
+                                                </h2>
+                                                <div class="cart-product-meta">
+                                                    <% if (stockCount> 0) { %>
+                                                        <span class="stock-badge in-stock">In Stock</span>
+                                                        <% } else { %>
+                                                            <span class="stock-badge out-of-stock">Out of Stock</span>
+                                                            <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. Unit Price -->
+                                        <div class="cart-price-cell">
+                                            <span class="cart-unit-price-label">Price: </span>
+                                            <span class="item-unit-price">₹<%= unitPrice.toLocaleString('en-IN', {
+                                                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        </div>
+
+                                        <!-- 3. Quantity Controls -->
+                                        <div class="cart-qty-cell">
+                                            <div class="qty-selector" aria-label="Quantity Controls">
+                                                <button type="button" class="qty-btn btn-qty-minus"
+                                                    aria-label="Decrease quantity" data-product-id="<%= product._id %>"
+                                                    <%=quantity <=1 ? 'disabled' : '' %>
+                                                    title="Decrease quantity"
+                                                    >
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2.5" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                    </svg>
+                                                </button>
+                                                <input type="number" class="qty-input" value="<%= quantity %>" min="1"
+                                                    max="<%= stockCount > 0 ? stockCount : 99 %>"
+                                                    aria-label="Item quantity" readonly>
+                                                <button type="button" class="qty-btn btn-qty-plus"
+                                                    aria-label="Increase quantity" data-product-id="<%= product._id %>"
+                                                    title="Increase quantity">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2.5" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- 4. Item Subtotal -->
+                                        <div class="cart-subtotal-cell">
+                                            <span class="cart-subtotal-label">Subtotal: </span>
+                                            <span class="item-subtotal-price">₹<%= itemSubtotal.toLocaleString('en-IN',
+                                                    { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        </div>
+
+                                        <!-- 5. Remove Button -->
+                                        <div class="cart-remove-cell">
+                                            <button type="button" class="btn-remove-item"
+                                                data-product-id="<%= product._id %>"
+                                                data-product-name="<%= product.name %>"
+                                                title="Remove <%= product.name %> from cart"
+                                                aria-label="Remove <%= product.name %> from cart">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path
+                                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                                    </path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </article>
+                                    <% }); %>
                         </div>
                     </div>
 
-                    <div class="checkout-btn-wrap">
-                        <button 
-                            type="button" 
-                            class="btn btn-primary btn-block btn-checkout" 
-                            disabled 
-                            title="Checkout coming soon"
-                        >
-                            Proceed to Checkout (Coming Soon)
+                    <!-- Bottom Toolbar: Continue Shopping & Clear Cart -->
+                    <div class="cart-actions-toolbar">
+                        <a href="/products" class="btn btn-outline">
+                            ← Continue Shopping
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" id="clearCartBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="width: 15px; height: 15px;">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                            Clear Cart
                         </button>
-                        <p class="checkout-hint">Checkout functionality will be available in an upcoming release.</p>
                     </div>
+                </section>
 
-                    <!-- Trust & Guarantee Elements -->
-                    <div class="cart-trust-box">
-                        <div class="trust-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                            <span>Secure SSL Encrypted Checkout</span>
+                <!-- Right Column: Order Summary Card -->
+                <aside class="cart-summary-column" aria-label="Order Summary">
+                    <div class="cart-summary-card">
+                        <h2>Order Summary</h2>
+
+                        <div class="summary-rows">
+                            <div class="summary-row">
+                                <span>Subtotal (<span id="summaryUnitsCount">
+                                        <%= totalItemUnits %>
+                                    </span>
+                                    <%= totalItemUnits===1 ? 'item' : 'items' %>)
+                                </span>
+                                <span id="summarySubtotal">₹<%= initialSubtotal.toLocaleString('en-IN', {
+                                        minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Estimated Shipping</span>
+                                <span class="summary-val-free">FREE</span>
+                            </div>
+                            <div class="summary-row total-row">
+                                <span>Total</span>
+                                <span class="summary-total-amount" id="summaryTotal">₹<%=
+                                        initialSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2 }) %></span>
+                            </div>
                         </div>
-                        <div class="trust-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
-                            <span>100% Authentic Products</span>
+
+                        <div class="checkout-btn-wrap">
+                            <a href="/checkout" class="btn btn-primary btn-block btn-checkout" id="proceedToCheckoutBtn"
+                                title="Proceed to checkout">
+                                <span>Proceed to Checkout</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; margin-left: 6px;">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
                         </div>
-                        <div class="trust-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            <span>Hassle-Free Returns</span>
+
+                        <!-- Trust & Guarantee Elements -->
+                        <div class="cart-trust-box">
+                            <div class="trust-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                <span>Secure SSL Encrypted Checkout</span>
+                            </div>
+                            <div class="trust-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                <span>100% Authentic Products</span>
+                            </div>
+                            <div class="trust-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Hassle-Free Returns</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </aside>
+                </aside>
 
-        </div>
-
-        <!-- Empty Cart State (Rendered when no items exist) -->
-        <section 
-            id="emptyCartContainer" 
-            class="empty-cart-card" 
-            style="<%= cartItems.length > 0 ? 'display: none;' : '' %>"
-            aria-label="Empty Cart Notification"
-        >
-            <div class="empty-cart-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
             </div>
-            <h2>Your cart is empty</h2>
-            <p>Looks like you haven't added anything to your cart yet. Explore our curated catalog and discover great products today!</p>
-            <a href="/products" class="btn btn-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-                Explore Products
-            </a>
-        </section>
+
+            <!-- Empty Cart State (Rendered when no items exist) -->
+            <section id="emptyCartContainer" class="empty-cart-card"
+                style="<%= cartItems.length > 0 ? 'display: none;' : '' %>" aria-label="Empty Cart Notification">
+                <div class="empty-cart-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
+                <h2>Your cart is empty</h2>
+                <p>Looks like you haven't added anything to your cart yet. Explore our curated catalog and discover
+                    great products today!</p>
+                <a href="/products" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    Explore Products
+                </a>
+            </section>
 
     </main>
 
     <!-- Clear Cart Confirmation Modal Dialog -->
-    <div class="modal-backdrop" id="clearCartModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="clearModalTitle">
+    <div class="modal-backdrop" id="clearCartModal" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="clearModalTitle">
         <div class="modal-dialog">
             <div class="modal-body-content">
                 <div class="modal-icon-wrap">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
                 </div>
                 <div class="modal-text-content">
                     <h3 id="clearModalTitle">Clear Your Cart?</h3>
-                    <p>Are you sure you want to remove all items from your shopping cart? This action cannot be undone.</p>
+                    <p>Are you sure you want to remove all items from your shopping cart? This action cannot be undone.
+                    </p>
                 </div>
             </div>
             <div class="modal-actions">
@@ -389,4 +400,5 @@
     <script src="/js/cart.js"></script>
 
 </body>
+
 </html>
